@@ -14,7 +14,7 @@ public class SampleCMOInfoRecord {
     @Id
     String sampleId;
     String userSampleId;
-    public String correctedCMOID;
+    public String correctedCMOID;  // Very important for the Mapping file
     @Column(name="othersampleid")
     public String cmoSampleId;
     String altId;

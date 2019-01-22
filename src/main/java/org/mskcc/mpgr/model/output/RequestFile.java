@@ -31,9 +31,15 @@ public class RequestFile {
 //            result.append("Run_Pipeline: other\n");
 //        }
 
-        result.append("PI_Name: " + request.piLastName + "," + request.piFirstName).append("\n");
-        result.append("PI_E-mail: " + request.piEmail).append("\n");
-        result.append("PI: " + request.labHeadEmail).append("\n");
+        if (request.piEmail == null || "".equals(request.piEmail)) {
+            result.append("PI_Name: " + request.laboratoryHead).append("\n");
+            result.append("PI_E-mail: " + request.labHeadEmail).append("\n");
+            result.append("PI: " + request.labHeadEmail.split("@")[0]).append("\n");
+        } else {
+            result.append("PI_Name: " + request.piLastName + "," + request.piFirstName).append("\n");
+            result.append("PI_E-mail: " + request.piEmail).append("\n");
+            result.append("PI: " + request.labHeadEmail).append("\n");
+        }
 
         result.append("Investigator_Name: " + request.investigator).append("\n");
         result.append("Investigator_E-mail: " + request.investigatorEmail).append("\n");
@@ -46,13 +52,21 @@ public class RequestFile {
 
         result.append("ProjectID: Proj_" + request.requestId).append("\n");
         result.append("ProjectTitle: " + project.cmoFinalProjectTitle).append("\n");
-        result.append("ProjectName: " + request.cmoProjectId).append("\n");
+        if (request.cmoProjectId == null || "".equals(request.cmoProjectId))
+            result.append("ProjectName: " + project.cmoProjectId).append("\n");
+        else
+            result.append("ProjectName: " + request.cmoProjectId).append("\n");
         result.append("ProjectDesc: " + project.cmoProjectBrief).append("\n");
         result.append("Project_Manager: " + request.projectManager).append("\n");
         result.append("Project_Manager_Email: " + request.projectManagerEmail).append("\n");
 
-        result.append("Data_Analyst: " + request.dataAnalyst).append("\n");
-        result.append("Data_Analyst_E-mail: " + request.dataAnalystEmail).append("\n");
+        if ("".equals(request.dataAnalyst)) {
+            result.append("Data_Analyst: NA\n");
+            result.append("Data_Analyst_E-mail: NA\n");
+        } else {
+            result.append("Data_Analyst: " + request.dataAnalyst).append("\n");
+            result.append("Data_Analyst_E-mail: " + request.dataAnalystEmail).append("\n");
+        }
 
         result.append("NumberOfSamples: " + getUniqueSamples(samples).size()).append("\n");
 
@@ -93,22 +107,24 @@ public class RequestFile {
     public static Set<String> getAllSpecies(List<SampleMPGR> samples) {
         Set<String> allSpecies = new HashSet<>();
         for (SampleMPGR s: samples) {
-            allSpecies.add(s.sampleCMOInfo.species);
+            allSpecies.add(s.sample.species);
         }
+
         return allSpecies;
     }
 
     public static String getTumorType(List<SampleMPGR> samples, Project project) {
         Set<String> tumorTypes = new HashSet<>();
         for (SampleMPGR s: samples) {
-            if (s.sampleCMOInfo.tumorType != null && !s.sampleCMOInfo.tumorType.trim().equals(""))
-                tumorTypes.add(s.sampleCMOInfo.tumorType);
+            if (s.sample.tumorType != null && !s.sample.tumorType.trim().equals(""))
+                tumorTypes.add(s.sample.tumorType);
         }
 
-        System.out.println("Tumor Types: " + String.join(",", tumorTypes));
+        System.out.println("Tumor Types Found: " + String.join(",", tumorTypes));
 
         if (tumorTypes.size() == 1) {
             String [] values = tumorTypes.toArray(new String[1]);
+            System.out.println("One tumor type found: " + Arrays.toString(values));
             return values[0];
         } else if (tumorTypes.size() > 1)
             return "mixed";

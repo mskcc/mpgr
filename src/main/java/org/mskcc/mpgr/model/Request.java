@@ -15,7 +15,7 @@ public class Request {
 
     String requestName;
 
-    String laboratoryHead;
+    public String laboratoryHead;
     public String labHeadEmail;
 
     public String investigator;
@@ -38,7 +38,7 @@ public class Request {
 
     long datecreated;
 
-    @OneToMany(fetch = FetchType.EAGER,mappedBy = "request")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "request")
     private List<Sample> samples = new ArrayList<>();
 
     public Request() {

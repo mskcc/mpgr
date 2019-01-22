@@ -42,7 +42,7 @@ public class MpgrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		String requestName = "06208";
+		String requestName = "08236_E"; // "06208";
 		Optional<Project> project = projectRepository.findById(requestName.substring(0,5));
 		Request request = requestRepository.findById(requestName).get();
 
@@ -59,15 +59,21 @@ public class MpgrApplication implements CommandLineRunner {
 			}
 		}
 
-		// look up sample cmo info record to get corrected CMO ID
+		// look up sample cmo info record & sample table record
 		List<SampleMPGR> samples = new ArrayList<>();
 		for (SampleQC sampleQC : samplesPassed) {
 			System.out.println("Querying CMO Info table for sample: " + sampleQC);
-			Optional<SampleCMOInfoRecord> cmoSample = sampleCMOInfoRepository.findByCmoSampleIdAndRequestId(sampleQC.cmoSampleId, sampleQC.request);
-			if (cmoSample.isPresent())
-				samples.add(new SampleMPGR(null, cmoSample.get(), sampleQC));
-			else
-				System.err.println("Sample ID has no CMO Sample record: " + sampleQC);
+			String cmoId = sampleQC.cmoSampleId;
+			Optional<Sample> sample = sampleRepository.findFirstByRequestIdAndCmoSampleIdOrderByDateCreatedAsc(sampleQC.request, cmoId);
+			if (sample.isPresent())
+				System.out.println("Found sample record." + sample.get());
+			Optional<SampleCMOInfoRecord> cmoSample = sampleCMOInfoRepository.findByCmoSampleIdAndRequestId(cmoId, requestName);
+			if (!cmoSample.isPresent()) {
+				System.out.println("Failed to find CMO sample by CMO id & request id.");
+				List<SampleCMOInfoRecord> cmoSamples = sampleCMOInfoRepository.findByCmoSampleId(cmoId);
+				cmoSample = Optional.ofNullable(cmoSamples.get(0));
+			}
+			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC));
 		}
 
 		String s = new MappingFile(samples).toString();
