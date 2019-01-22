@@ -9,11 +9,11 @@ public class Request {
 
     @Id
     public String requestId;
+    public String requestName;
+
     String projectid;
 
     public String cmoProjectId;
-
-    String requestName;
 
     public String laboratoryHead;
     public String labHeadEmail;
@@ -44,10 +44,23 @@ public class Request {
     public Request() {
     }
 
+    public boolean isImpact() {
+        if (requestName.matches("(.*)PACT(.*)"))
+            return true;
+        return false;
+    }
+
+    public boolean isExome() {
+        if (requestName.matches("(.*)WES(.*)"))
+            return true;
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Request{" +
                 "requestId='" + requestId + '\'' +
+                ", requestName='" + requestName + '\'' +
                 ", projectid='" + projectid + '\'' +
                 ", cmoProjectId='" + cmoProjectId + '\'' +
                 ", requestName='" + requestName + '\'' +
@@ -58,6 +71,7 @@ public class Request {
                 ", dataAnalyst='" + dataAnalyst + '\'' +
                 ", dataAnalystEmail='" + dataAnalystEmail + '\'' +
                 ", projectManager='" + projectManager + '\'' +
+                ", projectManagerEmail='" + projectManagerEmail + '\'' +
                 ", bicAutoRunnable=" + bicAutoRunnable +
                 ", manualDemux=" + manualDemux +
                 ", readMe='" + readMe + '\'' +

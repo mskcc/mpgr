@@ -23,7 +23,7 @@ public class SampleQC {
     @Column(name="seqqcstatus")
     String status;
 
-    String baitSet; // for example: SureSelect-All-Exon-V4-hg19
+    public String baitSet; // for example: SureSelect-All-Exon-V4-hg19
 
     long dateCreated;
 

@@ -2,6 +2,7 @@ package org.mskcc.mpgr.model.output;
 
 import org.mskcc.mpgr.model.Project;
 import org.mskcc.mpgr.model.Request;
+import org.mskcc.mpgr.model.SampleQC;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,15 +16,19 @@ public class RequestFile {
         //validateProjectInfo(request);
 
         StringBuilder result = new StringBuilder();
-        String pipelineName = "Roslin";
+        String pipelineName = "";
 
-//        if (request.getRequestType() == RequestType.EXOME) {
-            result.append(String.format("Pipelines: %s\n", pipelineName));
-            result.append(String.format("Run_Pipeline: %s\n", pipelineName));
-//        } else if (request.getRequestType() == RequestType.IMPACT) {
-//            result.append("Pipelines: dmp\n");
-//            result.append("Run_Pipeline: dmp\n");
-//        } else if (request.getRequestType() == RequestType.RNASEQ) {
+        if (request.isExome()) {
+            result.append("Pipelines: Roslin\n");
+            result.append("Run_Pipeline: Roslin\n");
+        } else if (request.isImpact()) {
+            result.append("Pipelines: dmp\n");
+            result.append("Run_Pipeline: dmp\n");
+        } else {
+            result.append("Pipelines: Roslin\n");
+            result.append("Run_Pipeline: Roslin\n");
+        }
+//      } else if (request.getRequestType() == RequestType.RNASEQ) {
 //            result.append("Run_Pipeline: rnaseq\n");
 //        } else if (request.getRecipe() == Recipe.CH_IP_SEQ) {
 //            result.append("Run_Pipeline: chipseq\n");
@@ -51,11 +56,11 @@ public class RequestFile {
         result.append("DeliverTo: NA").append("\n");
 
         result.append("ProjectID: Proj_" + request.requestId).append("\n");
-        result.append("ProjectTitle: " + project.cmoFinalProjectTitle).append("\n");
         if (request.cmoProjectId == null || "".equals(request.cmoProjectId))
             result.append("ProjectName: " + project.cmoProjectId).append("\n");
         else
             result.append("ProjectName: " + request.cmoProjectId).append("\n");
+        result.append("ProjectTitle: " + project.cmoFinalProjectTitle).append("\n");
         result.append("ProjectDesc: " + project.cmoProjectBrief).append("\n");
         result.append("Project_Manager: " + request.projectManager).append("\n");
         result.append("Project_Manager_Email: " + request.projectManagerEmail).append("\n");
@@ -71,7 +76,7 @@ public class RequestFile {
         result.append("NumberOfSamples: " + getUniqueSamples(samples).size()).append("\n");
 
         result.append("TumorType: " + getTumorType(samples, project)).append("\n");
-        result.append("Assay: " + getAssay(samples)).append("\n");
+        result.append("Assay: " + getAssay(request, samples)).append("\n");
         String speciesWCommas = String.join(",", getAllSpecies(samples));
         result.append("Species: " + speciesWCommas).append("\n");
 
@@ -132,13 +137,24 @@ public class RequestFile {
             return project.tumorType;
     }
 
-    // TODO review RequestDataPropagator.java assignProjectSpecificInfo code, project 06208 is failing among others
-    public static String getAssay(List<SampleMPGR> samples) {
+    public static String getAssay(Request request, List<SampleMPGR> samples) {
+        if (request.isImpact())
+            return request.requestName;
+
+        if (request.isExome())
+            return "EXOME";
+
         String species = String.join(",", getAllSpecies(samples));
 
-        if (species.contains("Human"))
-            return "AgilentExon_51MB_b37_v3";
-        else if ("Mouse".equals(species))
+        SampleQC sqc = samples.get(0).sampleQC;
+
+        // TODO review RequestDataPropagator.java assignProjectSpecificInfo code, this probably is not 100%
+        if (species.contains("Human")) {
+            if (sqc.baitSet.contains("Agilent"))
+                return "AgilentExon_51MB_b37_v3";
+            else
+                return sqc.baitSet.replace("_BAITS", "_b37");
+        } else if ("Mouse".equals(species))
             return "AgilentExon_51MB_b37_mm10_v3";
         else {
             System.err.println("Failed to determine Assay/Species: " + species);
