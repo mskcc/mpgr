@@ -2,13 +2,25 @@ buildscript {
 	ext {
 		springBootVersion = '2.1.1.RELEASE'
 	}
+
 	repositories {
-		mavenCentral()
+        mavenCentral()
+		maven {
+			url 'https://maven.atlassian.com/content/repositories/atlassian-public/'
+		}
 	}
+
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
+
 }
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.atlassian.com/content/repositories/atlassian-public/' }
+}
+
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -25,6 +37,13 @@ repositories {
 
 
 dependencies {
+	implementation( 'com.squareup.okhttp3:okhttp:3.12.1')
+
+	implementation ('com.atlassian.jira:jira-rest-java-client-api:5.1.2-2bd0a62e')
+	implementation ('com.atlassian.jira:jira-rest-java-client-core:5.1.2-2bd0a62e')
+	// found the right version to use from https://bitbucket.org/atlassian/fugue/downloads/?tab=tags
+	runtimeOnly ('io.atlassian.fugue:fugue:4.7.2')
+
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtimeOnly('mysql:mysql-connector-java')
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
