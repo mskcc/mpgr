@@ -1,5 +1,9 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
 
 @Entity
@@ -7,15 +11,16 @@ import javax.persistence.*;
 /**
  * Queried by "Request = '" + kickoffRequest.getId() + "' AND OtherSampleId = '" + sample.getCmoSampleId() in Pipeline Kickoff
  */
+@Getter @Setter @ToString
 public class SampleQC {
     @Id
     long recordId;
 
     @Column(name="othersampleid")
-    public String cmoSampleId;
+    String cmoSampleId;
 
-    public String sequencerRunFolder;
-    public String request;
+    String sequencerRunFolder;
+    String request;
 
     String altId;
     String sampleAliases;
@@ -23,7 +28,7 @@ public class SampleQC {
     @Column(name="seqqcstatus")
     String status;
 
-    public String baitSet; // for example: SureSelect-All-Exon-V4-hg19
+    String baitSet; // for example: SureSelect-All-Exon-V4-hg19
 
     long dateCreated;
 
@@ -51,19 +56,5 @@ public class SampleQC {
         int result = cmoSampleId != null ? cmoSampleId.hashCode() : 0;
         result = 31 * result + (sequencerRunFolder != null ? sequencerRunFolder.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "SampleQC{" +
-                "recordId=" + recordId +
-                ", cmoSampleId='" + cmoSampleId + '\'' +
-                ", sequencerRunFolder='" + sequencerRunFolder + '\'' +
-                ", request='" + request + '\'' +
-                ", altId='" + altId + '\'' +
-                ", sampleAliases='" + sampleAliases + '\'' +
-                ", status='" + status + '\'' +
-                ", dateCreated=" + dateCreated +
-                '}';
     }
 }

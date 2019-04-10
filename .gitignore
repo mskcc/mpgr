@@ -30,8 +30,6 @@ build/*
 
 logs/
 
-**lims*.properties
-**/application*.properties
 **Connection*
 
 libs/veloxapi.jar
@@ -40,3 +38,5 @@ libs/sapioutils.jar
 
 
 **.DS_Store
+src/main/resources/application.properties
+out/production/resources/application.properties

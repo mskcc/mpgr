@@ -1,14 +1,18 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
+@Getter @Setter
 public class LimsUser {
     @Id
-    public String userName;
+    String userName;
 
-    public String firstName;
-    public String lastName;
-    public String emailAddress;
+    String firstName;
+    String lastName;
+    String emailAddress;
 }

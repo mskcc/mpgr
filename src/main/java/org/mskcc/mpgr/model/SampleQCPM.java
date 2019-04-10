@@ -1,5 +1,10 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,6 +15,7 @@ import javax.persistence.Table;
 /**
  * The sample QC status table as maintained by the PM team.
  */
+@Getter @Setter @ToString @NoArgsConstructor
 public class SampleQCPM {
     @Id
     long recordId;
@@ -24,8 +30,6 @@ public class SampleQCPM {
     String altId;
 
     long dateCreated;
-
-    public SampleQCPM() {}
 
     public SampleQCPM(String cmoSampleId, String updatedRunFolder) {
         this.cmoSampleId = cmoSampleId;
@@ -55,18 +59,5 @@ public class SampleQCPM {
         int result = cmoSampleId != null ? cmoSampleId.hashCode() : 0;
         result = 31 * result + (updatedRunFolder != null ? updatedRunFolder.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "SampleQCPM{" +
-                "recordId=" + recordId +
-                ", cmoSampleId='" + cmoSampleId + '\'' +
-                ", sequencerRunFolder='" + sequencerRunFolder + '\'' +
-                ", updatedRunFolder='" + updatedRunFolder + '\'' +
-                ", status='" + status + '\'' +
-                ", altId='" + altId + '\'' +
-                ", dateCreated=" + dateCreated +
-                '}';
     }
 }

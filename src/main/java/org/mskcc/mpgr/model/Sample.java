@@ -1,8 +1,12 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
+@Getter @Setter
 public class Sample {
     @Id
     long recordId;
@@ -11,7 +15,7 @@ public class Sample {
 
     @Column(name="othersampleid")
     String cmoSampleId;
-    public String sampleId; // aka igo Sample Id
+    String sampleId; // aka igo Sample Id
     String altId;
 
     String exemplarSampleStatus; // 175 possible values, "Failed - Completed" samples are skipped
@@ -19,8 +23,8 @@ public class Sample {
     String patientId;
     String createdBy;
 
-    public String tumorType;
-    public String species;
+    String tumorType;
+    String species;
 
     long dateCreated;
 

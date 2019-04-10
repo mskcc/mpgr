@@ -28,49 +28,42 @@ public class RequestFile {
             result.append("Pipelines: Roslin\n");
             result.append("Run_Pipeline: Roslin\n");
         }
-//      } else if (request.getRequestType() == RequestType.RNASEQ) {
-//            result.append("Run_Pipeline: rnaseq\n");
-//        } else if (request.getRecipe() == Recipe.CH_IP_SEQ) {
-//            result.append("Run_Pipeline: chipseq\n");
-//        } else {
-//            result.append("Run_Pipeline: other\n");
-//        }
 
-        if (request.piEmail == null || "".equals(request.piEmail)) {
-            result.append("PI_Name: " + request.laboratoryHead).append("\n");
-            result.append("PI_E-mail: " + request.labHeadEmail).append("\n");
-            result.append("PI: " + request.labHeadEmail.split("@")[0]).append("\n");
+        if (request.getPiEmail() == null || "".equals(request.getPiEmail())) {
+            result.append("PI_Name: " + request.getLaboratoryHead()).append("\n");
+            result.append("PI_E-mail: " + request.getLabHeadEmail()).append("\n");
+            result.append("PI: " + request.getLabHeadEmail().split("@")[0]).append("\n");
         } else {
-            result.append("PI_Name: " + request.piLastName + "," + request.piFirstName).append("\n");
-            result.append("PI_E-mail: " + request.piEmail).append("\n");
-            result.append("PI: " + request.labHeadEmail).append("\n");
+            result.append("PI_Name: " + request.getPiLastName() + "," + request.getPiFirstName()).append("\n");
+            result.append("PI_E-mail: " + request.getPiEmail()).append("\n");
+            result.append("PI: " + request.getLabHeadEmail()).append("\n");
         }
 
-        result.append("Investigator_Name: " + request.investigator).append("\n");
-        result.append("Investigator_E-mail: " + request.investigatorEmail).append("\n");
-        if (request.investigatorEmail.contains("@")) {
-            String[] temp = request.investigatorEmail.split("@");
+        result.append("Investigator_Name: " + request.getInvestigator()).append("\n");
+        result.append("Investigator_E-mail: " + request.getInvestigatorEmail()).append("\n");
+        if (request.getInvestigatorEmail().contains("@")) {
+            String[] temp = request.getInvestigatorEmail().split("@");
             result.append("Investigator: ").append(temp[0]).append("\n");
         }
 
         result.append("DeliverTo: NA").append("\n");
 
-        result.append("ProjectID: Proj_" + request.requestId).append("\n");
-        if (request.cmoProjectId == null || "".equals(request.cmoProjectId))
-            result.append("ProjectName: " + project.cmoProjectId).append("\n");
+        result.append("ProjectID: Proj_" + request.getRequestId()).append("\n");
+        if (request.getCmoProjectId() == null || "".equals(request.getCmoProjectId()))
+            result.append("ProjectName: " + project.getCmoProjectId()).append("\n");
         else
-            result.append("ProjectName: " + request.cmoProjectId).append("\n");
-        result.append("ProjectTitle: " + project.cmoFinalProjectTitle).append("\n");
-        result.append("ProjectDesc: " + project.cmoProjectBrief).append("\n");
-        result.append("Project_Manager: " + request.projectManager).append("\n");
-        result.append("Project_Manager_Email: " + request.projectManagerEmail).append("\n");
+            result.append("ProjectName: " + request.getCmoProjectId()).append("\n");
+        result.append("ProjectTitle: " + project.getCmoFinalProjectTitle()).append("\n");
+        result.append("ProjectDesc: " + project.getCmoProjectBrief()).append("\n");
+        result.append("Project_Manager: " + request.getProjectManager()).append("\n");
+        result.append("Project_Manager_Email: " + request.getProjectManagerEmail()).append("\n");
 
-        if ("".equals(request.dataAnalyst)) {
+        if ("".equals(request.getDataAnalyst())) {
             result.append("Data_Analyst: NA\n");
             result.append("Data_Analyst_E-mail: NA\n");
         } else {
-            result.append("Data_Analyst: " + request.dataAnalyst).append("\n");
-            result.append("Data_Analyst_E-mail: " + request.dataAnalystEmail).append("\n");
+            result.append("Data_Analyst: " + request.getDataAnalyst()).append("\n");
+            result.append("Data_Analyst_E-mail: " + request.getDataAnalystEmail()).append("\n");
         }
 
         result.append("NumberOfSamples: " + getUniqueSamples(samples).size()).append("\n");
@@ -92,7 +85,7 @@ public class RequestFile {
         result.append("LibraryTypes: NA\n");
         result.append("Strand: NA\n");
 
-        result.append("ProjectFolder: /ifs/work/pi/pipelineKickoff/manifests/Proj_" + request.requestId).append("\n");
+        result.append("ProjectFolder: /ifs/work/pi/pipelineKickoff/manifests/Proj_" + request.getRequestId()).append("\n");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         result.append("DateOfLastUpdate: ").append(dateFormat.format(new Date())).append("\n");
@@ -104,7 +97,7 @@ public class RequestFile {
     public static Set<String> getUniqueSamples(List<SampleMPGR> samples) {
         Set<String> samplesByID = new HashSet<>();
         for (SampleMPGR s: samples) {
-            samplesByID.add(s.sampleQC.cmoSampleId);
+            samplesByID.add(s.sampleQC.getCmoSampleId());
         }
         return samplesByID;
     }
@@ -112,7 +105,7 @@ public class RequestFile {
     public static Set<String> getAllSpecies(List<SampleMPGR> samples) {
         Set<String> allSpecies = new HashSet<>();
         for (SampleMPGR s: samples) {
-            allSpecies.add(s.sample.species);
+            allSpecies.add(s.sample.getSpecies());
         }
 
         return allSpecies;
@@ -121,8 +114,8 @@ public class RequestFile {
     public static String getTumorType(List<SampleMPGR> samples, Project project) {
         Set<String> tumorTypes = new HashSet<>();
         for (SampleMPGR s: samples) {
-            if (s.sample.tumorType != null && !s.sample.tumorType.trim().equals(""))
-                tumorTypes.add(s.sample.tumorType);
+            if (s.sample.getTumorType() != null && !s.sample.getTumorType().trim().equals(""))
+                tumorTypes.add(s.sample.getTumorType());
         }
 
         System.out.println("Tumor Types Found: " + String.join(",", tumorTypes));
@@ -134,12 +127,12 @@ public class RequestFile {
         } else if (tumorTypes.size() > 1)
             return "mixed";
         else
-            return project.tumorType;
+            return project.getTumorType();
     }
 
     public static String getAssay(Request request, List<SampleMPGR> samples) {
         if (request.isImpact())
-            return request.requestName;
+            return request.getRequestName();
 
         if (request.isExome())
             return "EXOME";
@@ -150,10 +143,10 @@ public class RequestFile {
 
         // TODO review RequestDataPropagator.java assignProjectSpecificInfo code, this probably is not 100%
         if (species.contains("Human")) {
-            if (sqc.baitSet.contains("Agilent"))
+            if (sqc.getBaitSet().contains("Agilent"))
                 return "AgilentExon_51MB_b37_v3";
             else
-                return sqc.baitSet.replace("_BAITS", "_b37");
+                return sqc.getBaitSet().replace("_BAITS", "_b37");
         } else if ("Mouse".equals(species))
             return "AgilentExon_51MB_b37_mm10_v3";
         else {
@@ -165,7 +158,7 @@ public class RequestFile {
     public static Set<String> getRunID(List<SampleMPGR> samples) {
         Set<String> runIds = new HashSet<>();
         for (SampleMPGR s: samples) {
-            runIds.add(s.sampleQC.sequencerRunFolder);
+            runIds.add(s.sampleQC.getSequencerRunFolder());
         }
         return runIds;
     }

@@ -24,8 +24,8 @@ public class MappingFile {
         StringBuilder sb = new StringBuilder();
         for (SampleMPGR sample: samples) {
             String s = String.format("_1\ts_%s\t%s\t%s\tPE\n",
-                    sample.sampleCMOInfo.correctedCMOID.replace('-', '_'),
-                    sample.sampleQC.sequencerRunFolder,
+                    sample.sampleCMOInfo.getCorrectedCMOID().replace('-', '_'),
+                    sample.sampleQC.getSequencerRunFolder(),
                     sample.path);
             sb.append(s);
         }

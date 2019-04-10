@@ -1,5 +1,8 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -8,21 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 public class Project {
 
     @Id
-    public String projectid;
+    String projectid;
 
-    public String cmoProjectId;
-    public String cmoFinalProjectTitle;
-    public String cmoProjectBrief;
+    String cmoProjectId;
+    String cmoFinalProjectTitle;
+    String cmoProjectBrief;
 
-    public String tumorType;
+    String tumorType;
 
     long datecreated;
 
     public Project() {
     }
-
-
 }

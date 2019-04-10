@@ -4,6 +4,9 @@ import org.mskcc.mpgr.model.Sample;
 import org.mskcc.mpgr.model.SampleCMOInfoRecord;
 import org.mskcc.mpgr.model.SampleQC;
 
+/**
+ * Sample level information from multiple LIMS tables.
+ */
 public class SampleMPGR {
     public Sample sample;
     public SampleCMOInfoRecord sampleCMOInfo;
@@ -16,6 +19,6 @@ public class SampleMPGR {
         this.sampleCMOInfo = sampleCMOInfo;
         this.sampleQC = sampleQC;
         // guess the correct path so no need yet to mount /ifs/archive to run the code TODO
-        this.path = "/ifs/archive/GCL/hiseq/" + sampleQC.sequencerRunFolder + "/Project_" + sampleCMOInfo.requestId + "/" + sampleCMOInfo.cmoSampleId;
+        this.path = "/ifs/archive/GCL/hiseq/" + sampleQC.getSequencerRunFolder() + "/Project_" + sampleCMOInfo.getRequestId() + "/" + sampleCMOInfo.getCmoSampleId();
     }
 }

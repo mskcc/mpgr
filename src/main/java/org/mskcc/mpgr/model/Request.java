@@ -1,40 +1,45 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@ToString @Getter @Setter
 public class Request {
 
     @Id
-    public String requestId;
-    public String requestName;
+    String requestId;
+    String requestName;
 
     String projectid;
 
-    public String cmoProjectId;
+    String cmoProjectId;
 
-    public String laboratoryHead;
-    public String labHeadEmail;
+    String laboratoryHead;
+    String labHeadEmail;
 
-    public String investigator;
-    public String investigatorEmail;
+    String investigator;
+    String investigatorEmail;
 
-    public String dataAnalyst;
-    public String dataAnalystEmail;
+    String dataAnalyst;
+    String dataAnalystEmail;
 
-    public String projectManager;
+    String projectManager;
     @Transient
-    public String projectManagerEmail; // from lookup in limsUser table
+    String projectManagerEmail; // from lookup in limsUser table
 
     boolean bicAutoRunnable;
     Boolean manualDemux; // sometimes null as of Jan. 2019
     String readMe;
 
-    public String piFirstName;
-    public String piLastName;
-    public String piEmail;
+    String piFirstName;
+    String piLastName;
+    String piEmail;
 
     long datecreated;
 
@@ -54,32 +59,5 @@ public class Request {
         if (requestName.matches("(.*)WES(.*)"))
             return true;
         return false;
-    }
-
-    @Override
-    public String toString() {
-        return "Request{" +
-                "requestId='" + requestId + '\'' +
-                ", requestName='" + requestName + '\'' +
-                ", projectid='" + projectid + '\'' +
-                ", cmoProjectId='" + cmoProjectId + '\'' +
-                ", requestName='" + requestName + '\'' +
-                ", laboratoryHead='" + laboratoryHead + '\'' +
-                ", labHeadEmail='" + labHeadEmail + '\'' +
-                ", investigator='" + investigator + '\'' +
-                ", investigatorEmail='" + investigatorEmail + '\'' +
-                ", dataAnalyst='" + dataAnalyst + '\'' +
-                ", dataAnalystEmail='" + dataAnalystEmail + '\'' +
-                ", projectManager='" + projectManager + '\'' +
-                ", projectManagerEmail='" + projectManagerEmail + '\'' +
-                ", bicAutoRunnable=" + bicAutoRunnable +
-                ", manualDemux=" + manualDemux +
-                ", readMe='" + readMe + '\'' +
-                ", piFirstName='" + piFirstName + '\'' +
-                ", piLastName='" + piLastName + '\'' +
-                ", piEmail='" + piEmail + '\'' +
-                ", datecreated=" + datecreated +
-                ", samples=" + samples +
-                '}';
     }
 }
