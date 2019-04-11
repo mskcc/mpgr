@@ -1,9 +1,10 @@
 package org.mskcc.mpgr;
 
 import org.mskcc.mpgr.model.*;
+import org.mskcc.mpgr.model.output.MPGRFiles;
 import org.mskcc.mpgr.model.output.MappingFile;
 import org.mskcc.mpgr.model.output.RequestFile;
-import org.mskcc.mpgr.model.output.SampleMPGR;
+import org.mskcc.mpgr.model.SampleMPGR;
 import org.mskcc.mpgr.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -46,12 +47,38 @@ public class MpgrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws IOException {
-		//"08390_C"; // "07951_AC"; //""08236_E"; // "06208";
-        String jiraIssueKey = "RSL-200";
+		// TODO Currently failing: "RSL-709"
+        String [] jiraIssueKeys = {"RSL-708"}; // ,"RSL-710","RSL-711","RSL-712","RSL-713","RSL-714","RSL-715","RSL-716", "RSL-717"};
         JiraConnect jira = new JiraConnect();
-        String requestName = jira.getRequestName(jiraIssueKey);
+        List<MPGRFiles> outputs = new ArrayList<>();
 
-		Optional<Project> project = projectRepository.findById(requestName.substring(0,5));
+        // generate the MPGR files for each RSL Jira Issue
+        for (String jiraIssueKey : jiraIssueKeys) {
+			String requestName = jira.getRequestName(jiraIssueKey);
+			String projectName = requestName.substring(0, 5);
+
+			MPGRFiles o = getMpgrOutput(projectName, requestName);
+			o.setJiraIssueKey(jiraIssueKey);
+			outputs.add(o);
+		}
+
+        // Diff the generated MPGR output and the JIRA MPGR files
+        for (MPGRFiles mpgr : outputs) {
+        	JiraConnect.JiraMPGR jiraFiles = jira.getRequestAndMappingFile(mpgr.getJiraIssueKey());
+        	FileDiff.mappingFileDiff(jiraFiles.mappingFile, mpgr.getMappingFile().toString());
+
+//			System.out.println(jiraFiles.requestFile);
+//			String diff = FileDiff.requestFileDiff(jiraFiles.requestFile, mpgr.getRequestFile().toString());
+//			if (diff != null && !diff.equals(""))
+//				System.err.println("THE DIFF:" + diff);
+		}
+	}
+
+	// TODO find path to each sample in /ifs/archive
+	// TODO if no normal use pooled normal
+	private MPGRFiles getMpgrOutput(String projectName, String requestName) {
+		System.out.printf("Building MPGR files for LIMS project %s and request %s\n", projectName, requestName);
+		Optional<Project> project = projectRepository.findById(projectName);
 		Request request = requestRepository.findById(requestName).get();
 
 		List<SampleQC> samplesPassed = sampleQCRepository.findByRequestAndStatus(requestName, "Passed");
@@ -85,7 +112,8 @@ public class MpgrApplication implements CommandLineRunner {
 			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC));
 		}
 
-		String s = new MappingFile(samples).toString();
+		MappingFile mappingFile = new MappingFile(samples);
+		String s = mappingFile.toString();
 		System.out.println("\n\n" + s);
 
 		String pm = request.getProjectManager().trim();
@@ -119,16 +147,11 @@ public class MpgrApplication implements CommandLineRunner {
 			}
 		}
 
-		String updatedRF = RequestFile.toString(project.get(), request, samples);
+		RequestFile requestFile = new RequestFile(project.get(), request, samples);
+		String updatedRF = requestFile.toString();
 		System.out.println("\n\n" + updatedRF);
 
-		String rf200 = jira.getRequestFile(jiraIssueKey);
-		System.out.println(rf200);
-		String diff = RequestFileDiff.diff(rf200, updatedRF);
-		System.out.println("THE DIFF:" + diff);
-
-		// TODO find path to each sample in /ifs/archive
-		// if no normal use pooled normal
+		return new MPGRFiles(mappingFile, null, null, requestFile, null);
 	}
 
 	public ProjectRepository getProjectRepository() {

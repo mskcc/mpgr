@@ -1,5 +1,7 @@
 package org.mskcc.mpgr.model.output;
 
+import org.mskcc.mpgr.model.SampleMPGR;
+
 import java.util.List;
 
 /**
@@ -14,7 +16,7 @@ import java.util.List;
  <BR>
  */
 public class MappingFile {
-    List<SampleMPGR> samples;
+    private List<SampleMPGR> samples;
 
     public MappingFile(List<SampleMPGR> samples) {
         this.samples = samples;

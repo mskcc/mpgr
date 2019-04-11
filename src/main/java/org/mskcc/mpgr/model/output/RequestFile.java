@@ -1,7 +1,9 @@
 package org.mskcc.mpgr.model.output;
 
+import lombok.AllArgsConstructor;
 import org.mskcc.mpgr.model.Project;
 import org.mskcc.mpgr.model.Request;
+import org.mskcc.mpgr.model.SampleMPGR;
 import org.mskcc.mpgr.model.SampleQC;
 
 import java.text.DateFormat;
@@ -9,9 +11,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 public class RequestFile {
 
-    public static String toString(Project project, Request request, List<SampleMPGR> samples) {
+    private Project project;
+    private Request request;
+    private List<SampleMPGR> samples;
+
+    public String toString() {
         // TODO review this function
         //validateProjectInfo(request);
 

@@ -40,3 +40,4 @@ libs/sapioutils.jar
 **.DS_Store
 src/main/resources/application.properties
 out/production/resources/application.properties
+out/production/classes/META-INF/org.mskcc.mpgr.main.kotlin_module

@@ -45,36 +45,49 @@ public class JiraConnect {
         return summary;
     }
 
+
+    public static class JiraMPGR {
+        public String requestFile;
+        public String mappingFile;
+    }
+
     /*
      * The JIRA REST API does not download attachments,
      * just using okHttp jar for that once a file URL is known.
      */
-    public String getRequestFile(String jiraIssueKey) throws IOException {
+    public JiraMPGR getRequestAndMappingFile(String jiraIssueKey) throws IOException {
         IssueRestClient issueClient = jiraRestClient.getIssueClient();
         ArrayList<String> files = getJiraAttachmentsURLList(issueClient, jiraIssueKey);
         System.out.println("For Issue:" + jiraIssueKey  + " found files:" + Arrays.toString(files.toArray()));
 
+        JiraMPGR jiraFiles = new JiraMPGR();
         for (String fileName : files) {
             if (jiraUser == null)
                 System.exit(0);
             // TODO some issues have multiple
             if (fileName.endsWith("_request.txt")) {
                 String requestFileURL = fileName;
-                System.out.println("Downloading file: " + requestFileURL);
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .addInterceptor(new BasicAuthInterceptor(jiraUser, jiraPass))
-                        .build();
-                Request request = new Request.Builder().url(requestFileURL).build();
-                Response response = client.newCall(request).execute();
-                if (!response.isSuccessful()) {
-                    throw new IOException("Failed to download file: " + response);
-                }
-                String fullText = new String(response.body().bytes());
-                return fullText;
+                jiraFiles.requestFile = getJiraFile(requestFileURL);
+            }
+            if (fileName.endsWith("_mapping.txt")) {
+                jiraFiles.mappingFile = getJiraFile(fileName);
             }
         }
 
-        return null;
+        return jiraFiles;
+    }
+
+    protected String getJiraFile(String requestFileURL) throws IOException {
+        System.out.println("Downloading file: " + requestFileURL);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new BasicAuthInterceptor(jiraUser, jiraPass))
+                .build();
+        Request request = new Request.Builder().url(requestFileURL).build();
+        Response response = client.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to download file: " + response);
+        }
+        return new String(response.body().bytes());
     }
 
     protected ArrayList<String> getJiraAttachmentsURLList(IssueRestClient issueRestClient, String jiraIssueKey) {

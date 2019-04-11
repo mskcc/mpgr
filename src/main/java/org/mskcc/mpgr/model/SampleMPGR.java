@@ -1,4 +1,4 @@
-package org.mskcc.mpgr.model.output;
+package org.mskcc.mpgr.model;
 
 import org.mskcc.mpgr.model.Sample;
 import org.mskcc.mpgr.model.SampleCMOInfoRecord;
@@ -19,6 +19,6 @@ public class SampleMPGR {
         this.sampleCMOInfo = sampleCMOInfo;
         this.sampleQC = sampleQC;
         // guess the correct path so no need yet to mount /ifs/archive to run the code TODO
-        this.path = "/ifs/archive/GCL/hiseq/" + sampleQC.getSequencerRunFolder() + "/Project_" + sampleCMOInfo.getRequestId() + "/" + sampleCMOInfo.getCmoSampleId();
+        this.path = "/ifs/archive/GCL/hiseq/FASTQ/" + sampleQC.getSequencerRunFolder() + "/Project_" + sample.getRequestId() + "/Sample_" + sampleCMOInfo.getCmoSampleId() + "_IGO_" + sample.getSampleId();
     }
 }

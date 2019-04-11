@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class RequestFileDiff {
+public class FileDiff {
 
-    public static String diff(String requestFileOrig, String requestFileDelphi) {
+    public static String requestFileDiff(String requestFileOrig, String requestFileDelphi) {
         String [] orig = requestFileOrig.split("\n");
         Set<String> origLinesSet = new HashSet<>(Arrays.asList(orig));
         StringBuilder sb = new StringBuilder();
@@ -24,5 +24,13 @@ public class RequestFileDiff {
             }
         }
         return sb.toString();
+    }
+
+    public static String mappingFileDiff(String mappingFileOrig, String mappingFileNew) {
+        // TODO implement line by line diff
+        System.out.println(mappingFileOrig);
+        System.out.println("---------------");
+        System.out.println(mappingFileNew);
+        return null;
     }
 }
