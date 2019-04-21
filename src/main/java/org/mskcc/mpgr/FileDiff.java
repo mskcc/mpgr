@@ -27,7 +27,25 @@ public class FileDiff {
     }
 
     public static String mappingFileDiff(String mappingFileOrig, String mappingFileNew) {
+        String [] origLines = mappingFileOrig.split("\n");
+        String [] newLines = mappingFileNew.split("\n");
+        Set<String> origSet = new HashSet<>();
+        for (String line : origLines)
+            origSet.add(line.substring(0,50));
+        Set<String> newSet = new HashSet<>();
+        for (String line : newLines) {
+            newSet.add(line.substring(0,50));
+            if (!origSet.contains(line.substring(0,50))) {
+                System.err.println(line);
+            }
+        }
+        for (String line : origLines) {
+            if (!newSet.contains(line.substring(0,50))) {
+                System.err.println(line);
+            }
+        }
         // TODO implement line by line diff
+        System.out.println("-------Original--------");
         System.out.println(mappingFileOrig);
         System.out.println("---------------");
         System.out.println(mappingFileNew);

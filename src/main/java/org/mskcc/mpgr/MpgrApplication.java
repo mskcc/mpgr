@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,8 +51,10 @@ public class MpgrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws IOException {
+		// won't process "RSL-714"
 		// TODO Currently failing: "RSL-709"
-        String [] jiraIssueKeys = {"RSL-708"}; // ,"RSL-710","RSL-711","RSL-712","RSL-713","RSL-714","RSL-715","RSL-716", "RSL-717"};
+        //String [] jiraIssueKeys = {"RSL-708","RSL-710","RSL-711","RSL-712","RSL-713","RSL-715","RSL-716", "RSL-717"};
+		String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
         JiraConnect jira = new JiraConnect();
         List<MPGRFiles> outputs = new ArrayList<>();
 
@@ -74,7 +80,6 @@ public class MpgrApplication implements CommandLineRunner {
 		}
 	}
 
-	// TODO find path to each sample in /ifs/archive
 	// TODO if no normal use pooled normal
 	private MPGRFiles getMpgrOutput(String projectName, String requestName) {
 		System.out.printf("Building MPGR files for LIMS project %s and request %s\n", projectName, requestName);
@@ -109,7 +114,9 @@ public class MpgrApplication implements CommandLineRunner {
 				List<SampleCMOInfoRecord> cmoSamples = sampleCMOInfoRepository.findByCmoSampleId(cmoId);
 				cmoSample = Optional.ofNullable(cmoSamples.get(0));
 			}
-			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC));
+			String fastqSampleName = cmoSample.get().getCmoSampleId() + "_IGO_" + sample.get().getSampleId();
+			String runFolder = findFastqDirectory(sample.get().getRequestId(), fastqSampleName, sampleQC.getSequencerRunFolder());
+			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC, runFolder));
 		}
 
 		MappingFile mappingFile = new MappingFile(samples);
@@ -122,9 +129,8 @@ public class MpgrApplication implements CommandLineRunner {
 			String firstName = "";
 			String lastName = "";
 
-			String[] temp = pm.replaceAll(",", "")
-					.replace(".", "")
-					.split("\\s+");
+			String[] temp =
+					pm.replaceAll(",", "").replace(".", "").split("\\s+");
 
 			if (temp.length == 1) {
 				System.err.println(String.format("Not valid full name: <%s>.", pm));
@@ -144,14 +150,27 @@ public class MpgrApplication implements CommandLineRunner {
 				request.setProjectManagerEmail(user.get().getEmailAddress());
 			} else {
 				System.err.println(String.format("LIMS user not found for <%s %s>.", lastName, firstName));
+				System.err.flush();
 			}
 		}
-
 		RequestFile requestFile = new RequestFile(project.get(), request, samples);
 		String updatedRF = requestFile.toString();
 		System.out.println("\n\n" + updatedRF);
 
 		return new MPGRFiles(mappingFile, null, null, requestFile, null);
+	}
+
+	protected String findFastqDirectory(String requestId, String fastqSampleName, String sequencerRunFolder) {
+		// TODO interface & unit test
+		String url = "http://delphi.mskcc.org:8080/ngs-stats/rundone/latestrun/" + requestId + "/" + fastqSampleName + "/" + sequencerRunFolder;
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> response =
+				restTemplate.exchange(url,
+						HttpMethod.GET, null, new ParameterizedTypeReference<String>() {
+						});
+		String latestRunFolder = response.getBody();
+		System.out.println("Latest Run Folder: " + latestRunFolder);
+		return latestRunFolder;
 	}
 
 	public ProjectRepository getProjectRepository() {
