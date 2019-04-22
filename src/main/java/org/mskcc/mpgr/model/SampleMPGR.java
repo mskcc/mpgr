@@ -8,12 +8,12 @@ public class SampleMPGR {
     public SampleCMOInfoRecord sampleCMOInfo;
     public SampleQC sampleQC;
 
-    public String runFolder; // currently only non-LIMS information required for the mapping file
+    public ArchivedFastq archivedFastq; // currently only non-LIMS information required for the mapping file
 
-    public SampleMPGR(Sample sample, SampleCMOInfoRecord sampleCMOInfo, SampleQC sampleQC, String runFolder) {
+    public SampleMPGR(Sample sample, SampleCMOInfoRecord sampleCMOInfo, SampleQC sampleQC, ArchivedFastq archivedFastq) {
         this.sample = sample;
         this.sampleCMOInfo = sampleCMOInfo;
         this.sampleQC = sampleQC;
-        this.runFolder = runFolder;
+        this.archivedFastq = archivedFastq;
     }
 }

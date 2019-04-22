@@ -25,14 +25,10 @@ public class MappingFile {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (SampleMPGR sample: samples) {
-            String path =
-                    "/ifs/archive/GCL/hiseq/FASTQ/" + sample.runFolder +
-                    "/Project_" + sample.sample.getRequestId() +
-                    "/Sample_" + sample.sampleCMOInfo.getCmoSampleId() + "_IGO_" + sample.sample.getSampleId();
             String s = String.format("_1\ts_%s\t%s\t%s\tPE\n",
                     sample.sampleCMOInfo.getCorrectedCMOID().replace('-', '_'),
-                    sample.runFolder,
-                    path);
+                    sample.archivedFastq.getRunBaseDirectory(),
+                    sample.archivedFastq.getFastq());
             sb.append(s);
         }
         return sb.toString();

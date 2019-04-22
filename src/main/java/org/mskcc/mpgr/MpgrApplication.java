@@ -54,7 +54,8 @@ public class MpgrApplication implements CommandLineRunner {
 		// won't process "RSL-714"
 		// TODO Currently failing: "RSL-709"
         //String [] jiraIssueKeys = {"RSL-708","RSL-710","RSL-711","RSL-712","RSL-713","RSL-715","RSL-716", "RSL-717"};
-		String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
+		//String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
+		String [] jiraIssueKeys = {"RSL-741"};
         JiraConnect jira = new JiraConnect();
         List<MPGRFiles> outputs = new ArrayList<>();
 
@@ -71,7 +72,13 @@ public class MpgrApplication implements CommandLineRunner {
         // Diff the generated MPGR output and the JIRA MPGR files
         for (MPGRFiles mpgr : outputs) {
         	JiraConnect.JiraMPGR jiraFiles = jira.getRequestAndMappingFile(mpgr.getJiraIssueKey());
-        	FileDiff.mappingFileDiff(jiraFiles.mappingFile, mpgr.getMappingFile().toString());
+        	if (jiraFiles.mappingFile != null)
+	        	FileDiff.mappingFileDiff(jiraFiles.mappingFile, mpgr.getMappingFile().toString());
+        	else {
+        		System.out.println("No mapping file on JIRA.");
+				System.out.println(mpgr.getMappingFile().toString());
+				System.out.flush();
+			}
 
 //			System.out.println(jiraFiles.requestFile);
 //			String diff = FileDiff.requestFileDiff(jiraFiles.requestFile, mpgr.getRequestFile().toString());
@@ -115,8 +122,8 @@ public class MpgrApplication implements CommandLineRunner {
 				cmoSample = Optional.ofNullable(cmoSamples.get(0));
 			}
 			String fastqSampleName = cmoSample.get().getCmoSampleId() + "_IGO_" + sample.get().getSampleId();
-			String runFolder = findFastqDirectory(sample.get().getRequestId(), fastqSampleName, sampleQC.getSequencerRunFolder());
-			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC, runFolder));
+			ArchivedFastq archivedFastq = findFastqDirectory(sample.get().getRequestId(), fastqSampleName, sampleQC.getSequencerRunFolder());
+			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC, archivedFastq));
 		}
 
 		MappingFile mappingFile = new MappingFile(samples);
@@ -160,17 +167,20 @@ public class MpgrApplication implements CommandLineRunner {
 		return new MPGRFiles(mappingFile, null, null, requestFile, null);
 	}
 
-	protected String findFastqDirectory(String requestId, String fastqSampleName, String sequencerRunFolder) {
+	protected ArchivedFastq findFastqDirectory(String requestId, String fastqSampleName, String sequencerRunFolder) {
 		// TODO interface & unit test
 		String url = "http://delphi.mskcc.org:8080/ngs-stats/rundone/latestrun/" + requestId + "/" + fastqSampleName + "/" + sequencerRunFolder;
+		System.out.println("Querying Fastq.gz database for: " + url);
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response =
+		ResponseEntity<ArchivedFastq> response =
 				restTemplate.exchange(url,
-						HttpMethod.GET, null, new ParameterizedTypeReference<String>() {
+						HttpMethod.GET, null, new ParameterizedTypeReference<ArchivedFastq>() {
 						});
-		String latestRunFolder = response.getBody();
-		System.out.println("Latest Run Folder: " + latestRunFolder);
-		return latestRunFolder;
+		ArchivedFastq fastq = response.getBody();
+		if (fastq == null)
+			throw new RuntimeException("Fastq not found in archive database.");
+		System.out.println("Latest Run Folder: " + fastq);
+		return fastq;
 	}
 
 	public ProjectRepository getProjectRepository() {
