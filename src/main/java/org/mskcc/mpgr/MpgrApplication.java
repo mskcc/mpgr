@@ -1,5 +1,7 @@
 package org.mskcc.mpgr;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.mskcc.mpgr.model.*;
 import org.mskcc.mpgr.model.output.MPGRFiles;
 import org.mskcc.mpgr.model.output.MappingFile;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.util.*;
 
 @SpringBootApplication
+@Getter @Setter
 public class MpgrApplication implements CommandLineRunner {
 
 	@Autowired
@@ -54,8 +57,7 @@ public class MpgrApplication implements CommandLineRunner {
 		// won't process "RSL-714"
 		// TODO Currently failing sample-set: "RSL-709"
         //String [] jiraIssueKeys = {"RSL-708","RSL-710","RSL-711","RSL-712","RSL-713","RSL-715","RSL-716", "RSL-717"};
-		//String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
-		String [] jiraIssueKeys = {"RSL-741"};
+		String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
         JiraConnect jira = new JiraConnect();
         List<MPGRFiles> outputs = new ArrayList<>();
 
@@ -87,7 +89,6 @@ public class MpgrApplication implements CommandLineRunner {
 		}
 	}
 
-	// TODO if no normal use pooled normal
 	private MPGRFiles getMpgrOutput(String projectName, String requestName) {
 		System.out.printf("Building MPGR files for LIMS project %s and request %s\n", projectName, requestName);
 		Optional<Project> project = projectRepository.findById(projectName);
@@ -107,7 +108,7 @@ public class MpgrApplication implements CommandLineRunner {
 		}
 
 		// look up sample cmo info record & sample table record
-		List<SampleMPGR> samples = new ArrayList<>();
+		List<SampleMPGR> samplesMPGR = new ArrayList<>();
 		for (SampleQC sampleQC : samplesPassed) {
 			System.out.println("Querying CMO Info table for sample: " + sampleQC);
 			String cmoId = sampleQC.getCmoSampleId();
@@ -121,12 +122,15 @@ public class MpgrApplication implements CommandLineRunner {
 				List<SampleCMOInfoRecord> cmoSamples = sampleCMOInfoRepository.findByCmoSampleId(cmoId);
 				cmoSample = Optional.ofNullable(cmoSamples.get(0));
 			}
-			String fastqSampleName = cmoSample.get().getCmoSampleId() + "_IGO_" + sample.get().getSampleId();
-			ArchivedFastq archivedFastq = findFastqDirectory(sample.get().getRequestId(), fastqSampleName, sampleQC.getSequencerRunFolder());
-			samples.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC, archivedFastq));
+
+			ArchivedFastq archivedFastq =
+					findFastqDirectory(sample.get().getRequestId(), cmoSample.get().getCmoSampleId(), sample.get().getSampleId(), sampleQC.getSequencerRunFolder());
+			samplesMPGR.add(new SampleMPGR(sample.get(), cmoSample.get(), sampleQC, archivedFastq));
 		}
 
-		MappingFile mappingFile = new MappingFile(samples);
+		List<ArchivedFastq> pooledNormals = addPooledNormals(samplesMPGR);
+
+		MappingFile mappingFile = new MappingFile(samplesMPGR, pooledNormals);
 		String s = mappingFile.toString();
 		System.out.println("\n\n" + s);
 
@@ -160,16 +164,51 @@ public class MpgrApplication implements CommandLineRunner {
 				System.err.flush();
 			}
 		}
-		RequestFile requestFile = new RequestFile(project.get(), request, samples);
+		RequestFile requestFile = new RequestFile(project.get(), request, samplesMPGR);
 		String updatedRF = requestFile.toString();
 		System.out.println("\n\n" + updatedRF);
 
 		return new MPGRFiles(mappingFile, null, null, requestFile, null);
 	}
 
-	protected ArchivedFastq findFastqDirectory(String requestId, String fastqSampleName, String sequencerRunFolder) {
+	/**
+	 * Pooled normal should be used if no normal was received,
+	 * tumor normal pairing is checked based on cmopatientId & run
+	 * <BR>
+	 * For all IMPACT/HEMEPACT there should always be a pooled normal. The BIC/DMP pipeline depends on it being there
+	 * @param samplesMPGR
+	 */
+	protected List<ArchivedFastq> addPooledNormals(List<SampleMPGR> samplesMPGR) {
+		// TODO add pooled normals for IMPACT/HEMEPACT
+		Set<String> normals = new HashSet<>(); // normals by run & patient ID
+		for (SampleMPGR sample : samplesMPGR) {
+			if (sample.sampleCMOInfo.isNormal()) {
+				String key = sample.archivedFastq.getRun() + sample.sampleCMOInfo.getCmoPatientId();
+				normals.add(key);
+			}
+		}
+
+		List<ArchivedFastq> pooledNormals = new ArrayList<>();
+		for (SampleMPGR sample : samplesMPGR) {
+			if (sample.sampleCMOInfo.isTumor()) {
+				String key = sample.archivedFastq.getRun() + sample.sampleCMOInfo.getCmoPatientId();
+				if (!normals.contains(key)) {
+					System.out.println("No matching normal for tumor: " + sample.sampleCMOInfo);
+					Set<ArchivedFastq> n = findPooledNormalFastqDirectory(sample.sampleQC.getSequencerRunFolder(), sample.sampleCMOInfo.getPreservation());
+					if (n != null) {
+						pooledNormals.addAll(n);
+					}
+				}
+			}
+		}
+		return pooledNormals;
+	}
+
+	protected ArchivedFastq findFastqDirectory(String requestId, String cmoSampleId, String sampleId, String sequencerRun) {
 		// TODO interface & unit test
-		String url = "http://delphi.mskcc.org:8080/ngs-stats/rundone/latestrun/" + requestId + "/" + fastqSampleName + "/" + sequencerRunFolder;
+		String fastqName = ArchivedFastq.fastqName(cmoSampleId, sampleId);
+
+		String url = "http://delphi.mskcc.org:8080/ngs-stats/rundone/latestrun/" + requestId + "/" + fastqName + "/" + sequencerRun;
 		System.out.println("Querying Fastq.gz database for: " + url);
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<ArchivedFastq> response =
@@ -183,67 +222,24 @@ public class MpgrApplication implements CommandLineRunner {
 		return fastq;
 	}
 
-	public ProjectRepository getProjectRepository() {
-		return projectRepository;
-	}
-
-	public void setProjectRepository(ProjectRepository projectRepository) {
-		this.projectRepository = projectRepository;
-	}
-
-	public RequestRepository getRequestRepository() {
-		return requestRepository;
-	}
-
-	public void setRequestRepository(RequestRepository requestRepository) {
-		this.requestRepository = requestRepository;
-	}
-
-	public SampleRepository getSampleRepository() {
-		return sampleRepository;
-	}
-
-	public void setSampleRepository(SampleRepository sampleRepository) {
-		this.sampleRepository = sampleRepository;
-	}
-
-	public SampleQCRepository getSampleQCRepository() {
-		return sampleQCRepository;
-	}
-
-	public void setSampleQCRepository(SampleQCRepository sampleQCRepository) {
-		this.sampleQCRepository = sampleQCRepository;
-	}
-
-	public SampleCMOInfoRepository getSampleCMOInfoRepository() {
-		return sampleCMOInfoRepository;
-	}
-
-	public void setSampleCMOInfoRepository(SampleCMOInfoRepository sampleCMOInfoRepository) {
-		this.sampleCMOInfoRepository = sampleCMOInfoRepository;
-	}
-
-	public SampleQCPMTeamRepository getSampleQCPMTeamRepository() {
-		return sampleQCPMTeamRepository;
-	}
-
-	public void setSampleQCPMTeamRepository(SampleQCPMTeamRepository sampleQCPMTeamRepository) {
-		this.sampleQCPMTeamRepository = sampleQCPMTeamRepository;
-	}
-
-	public LimsUserRepository getLimsUserRepository() {
-		return limsUserRepository;
-	}
-
-	public void setLimsUserRepository(LimsUserRepository limsUserRepository) {
-		this.limsUserRepository = limsUserRepository;
-	}
-
-	public static Boolean getRunAsExome() {
-		return runAsExome;
-	}
-
-	public static void setRunAsExome(Boolean runAsExome) {
-		MpgrApplication.runAsExome = runAsExome;
+	protected Set<ArchivedFastq> findPooledNormalFastqDirectory(String sequencerRun, String preservation) {
+		// TODO review along with findFastqDirectory
+		String url = "http://delphi.mskcc.org:8080/ngs-stats/rundone/latestpoolednormal/" + sequencerRun;
+		System.out.println("Querying Fastq.gz database for: " + url);
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<List<ArchivedFastq>> response =
+				restTemplate.exchange(url,
+						HttpMethod.GET, null, new ParameterizedTypeReference<List<ArchivedFastq>>() {
+						});
+		List<ArchivedFastq> fastqs = response.getBody();
+		Set<ArchivedFastq> result = new HashSet<>();
+		for (ArchivedFastq fastq : fastqs) {
+			if (fastq.getFastqDirectory().contains(preservation))
+				result.add(fastq);
+		}
+		if (result == null)
+			throw new RuntimeException("Fastq not found in archive database.");
+		System.out.println("Pooled normal fastq.gz found:" + fastqs);
+		return result;
 	}
 }

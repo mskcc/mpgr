@@ -46,6 +46,12 @@ public class FileDiff {
                 System.err.println(line);
             }
         }
+        System.err.flush(); System.out.flush();
+        try {
+            Thread.sleep(400);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // TODO implement line by line diff
         System.out.println("-------Original--------");
         System.out.println(mappingFileOrig);

@@ -1,8 +1,12 @@
 package org.mskcc.mpgr.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Sample level information from multiple LIMS tables.
  */
+@Getter @Setter
 public class SampleMPGR {
     public Sample sample;
     public SampleCMOInfoRecord sampleCMOInfo;

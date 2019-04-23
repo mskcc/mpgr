@@ -33,4 +33,15 @@ public class SampleCMOInfoRecord {
     private String species;
     private String preservation;
     private String tumorOrNormal;
+
+    public boolean isNormal() {
+        if ("Normal".equals(tumorOrNormal))
+            return true;
+        return false;
+    }
+    public boolean isTumor() {
+        if ("Tumor".equals(tumorOrNormal))
+            return true;
+        return false;
+    }
 }
