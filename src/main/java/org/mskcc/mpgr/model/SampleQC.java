@@ -1,36 +1,37 @@
 package org.mskcc.mpgr.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "SeqAnalysisSampleQC")
 /**
  * Queried by "Request = '" + kickoffRequest.getId() + "' AND OtherSampleId = '" + sample.getCmoSampleId() in Pipeline Kickoff
  */
-@Getter @Setter @ToString
+@Entity
+@Table(name = "SeqAnalysisSampleQC")
+@Getter @Setter @ToString @NoArgsConstructor
 public class SampleQC {
     @Id
-    long recordId;
+    private long recordId;
 
     @Column(name="othersampleid")
-    String cmoSampleId;
+    private String cmoSampleId;
 
-    String sequencerRunFolder;
-    String request;
+    private String sequencerRunFolder;
+    private String request;
 
-    String altId;
-    String sampleAliases;
+    private String altId;
+    private String sampleAliases;
 
     @Column(name="seqqcstatus")
-    String status;
+    private String status;
 
-    String baitSet; // for example: SureSelect-All-Exon-V4-hg19
+    private String baitSet; // for example: SureSelect-All-Exon-V4-hg19
 
-    long dateCreated;
+    private long dateCreated;
 
     boolean passed() {
         if ("Passed".equals(status))

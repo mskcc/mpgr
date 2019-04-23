@@ -10,9 +10,9 @@ import javax.persistence.Id;
 @Getter @Setter
 public class LimsUser {
     @Id
-    String userName;
+    private String userName;
 
-    String firstName;
-    String lastName;
-    String emailAddress;
+    private String firstName;
+    private String lastName;
+    private String emailAddress;
 }

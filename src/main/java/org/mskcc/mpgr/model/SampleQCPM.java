@@ -10,26 +10,26 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "postSeqAnalysisQc")
 /**
  * The sample QC status table as maintained by the PM team.
  */
+@Entity
+@Table(name = "postSeqAnalysisQc")
 @Getter @Setter @ToString @NoArgsConstructor
 public class SampleQCPM {
     @Id
-    long recordId;
+    private long recordId;
 
     @Column(name="othersampleid")
-    String cmoSampleId;
-    String sequencerRunFolder;
-    String updatedRunFolder;
+    private String cmoSampleId;
+    private String sequencerRunFolder;
+    private String updatedRunFolder;
     @Column(name="postseqqcstatus")
-    String status; // passed, failed, redacted
+    private String status; // passed, failed, redacted
 
-    String altId;
+    private String altId;
 
-    long dateCreated;
+    private long dateCreated;
 
     public SampleQCPM(String cmoSampleId, String updatedRunFolder) {
         this.cmoSampleId = cmoSampleId;

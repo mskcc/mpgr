@@ -9,28 +9,28 @@ import javax.persistence.*;
 @Getter @Setter
 public class Sample {
     @Id
-    long recordId;
+    private long recordId;
 
-    String requestId;
+    private String requestId;
 
     @Column(name="othersampleid")
-    String cmoSampleId;
-    String sampleId; // aka igo Sample Id
-    String altId;
+    private String cmoSampleId;
+    private String sampleId; // aka igo Sample Id
+    private String altId;
 
-    String exemplarSampleStatus; // 175 possible values, "Failed - Completed" samples are skipped
+    private String exemplarSampleStatus; // 175 possible values, "Failed - Completed" samples are skipped
 
-    String patientId;
-    String createdBy;
+    private String patientId;
+    private String createdBy;
 
-    String tumorType;
-    String species;
+    private String tumorType;
+    private String species;
 
-    long dateCreated;
+    private long dateCreated;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="requestid", insertable=false, updatable = false)
-    Request request;
+    private Request request;
 
     @Override
     public String toString() {

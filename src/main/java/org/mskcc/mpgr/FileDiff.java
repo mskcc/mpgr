@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-
+/**
+ * Compare pipeline-kickoff JIRA-RSL MPGR output to new MPGR output.
+ */
 public class FileDiff {
 
     public static String requestFileDiff(String requestFileOrig, String requestFileDelphi) {

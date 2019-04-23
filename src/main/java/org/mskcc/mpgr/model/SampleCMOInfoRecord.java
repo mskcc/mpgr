@@ -1,6 +1,7 @@
 package org.mskcc.mpgr.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,25 +12,25 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="samplecmoinforecords")
-@Getter @Setter @ToString
+@Getter @Setter @ToString @NoArgsConstructor
 public class SampleCMOInfoRecord {
 
-    long recordId;
+    private long recordId;
 
     @Id
-    String sampleId;
-    String userSampleId;
-    String correctedCMOID;  // Very important for the Mapping file
+    private String sampleId;
+    private String userSampleId;
+    private String correctedCMOID;  // Very important for the Mapping file
     @Column(name="othersampleid")
-    String cmoSampleId;
-    String altId;
+    private String cmoSampleId;
+    private String altId;
 
-    String cmoPatientId;
+    private String cmoPatientId;
 
-    String requestId;  // blank for 1/3 of entries
+    private String requestId;  // blank for 1/3 of entries, could populate via Sapio LIMS API
 
-    String tumorType;
-    String species;
-    String preservation;
-    String tumorOrNormal;
+    private String tumorType;
+    private String species;
+    private String preservation;
+    private String tumorOrNormal;
 }

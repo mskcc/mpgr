@@ -52,7 +52,7 @@ public class MpgrApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws IOException {
 		// won't process "RSL-714"
-		// TODO Currently failing: "RSL-709"
+		// TODO Currently failing sample-set: "RSL-709"
         //String [] jiraIssueKeys = {"RSL-708","RSL-710","RSL-711","RSL-712","RSL-713","RSL-715","RSL-716", "RSL-717"};
 		//String [] jiraIssueKeys = {"RSL-753", "RSL-754", "RSL-755", "RSL-756", "RSL-757"};//, "RSL-758", "RSL-759", "RSL-760"};
 		String [] jiraIssueKeys = {"RSL-741"};

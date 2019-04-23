@@ -6,13 +6,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter @Setter
-@ToString
 /**
- * Non LIMS archived fastq.gz location information.
+ * Archived fastq.gz location information, information currently not in the LIMS.
  */
+@NoArgsConstructor @AllArgsConstructor
+@Getter @Setter @ToString
 public class ArchivedFastq {
     private static Logger log = LoggerFactory.getLogger(ArchivedFastq.class);
 

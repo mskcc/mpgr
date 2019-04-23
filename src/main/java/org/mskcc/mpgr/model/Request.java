@@ -13,35 +13,35 @@ import java.util.List;
 public class Request {
 
     @Id
-    String requestId;
-    String requestName;
+    private String requestId;
+    private String requestName;
 
-    String projectid;
+    private String projectid;
 
-    String cmoProjectId;
+    private String cmoProjectId;
 
-    String laboratoryHead;
-    String labHeadEmail;
+    private String laboratoryHead;
+    private String labHeadEmail;
 
-    String investigator;
-    String investigatorEmail;
+    private String investigator;
+    private String investigatorEmail;
 
-    String dataAnalyst;
-    String dataAnalystEmail;
+    private String dataAnalyst;
+    private String dataAnalystEmail;
 
-    String projectManager;
+    private String projectManager;
     @Transient
-    String projectManagerEmail; // from lookup in limsUser table
+    private String projectManagerEmail; // from lookup in limsUser table
 
-    boolean bicAutoRunnable;
-    Boolean manualDemux; // sometimes null as of Jan. 2019
-    String readMe;
+    private boolean bicAutoRunnable;
+    private Boolean manualDemux; // sometimes null as of Jan. 2019
+    private String readMe;
 
-    String piFirstName;
-    String piLastName;
-    String piEmail;
+    private String piFirstName;
+    private String piLastName;
+    private String piEmail;
 
-    long datecreated;
+    private long datecreated;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "request")
     private List<Sample> samples = new ArrayList<>();

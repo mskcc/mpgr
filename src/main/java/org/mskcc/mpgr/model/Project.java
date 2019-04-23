@@ -10,21 +10,22 @@ import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A CMO Study, "Project" in the LIMS
+ */
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 public class Project {
-
     @Id
-    String projectid;
+    private String projectid;
 
-    String cmoProjectId;
-    String cmoFinalProjectTitle;
-    String cmoProjectBrief;
+    private String cmoProjectId;
+    private String cmoFinalProjectTitle;
+    private String cmoProjectBrief;
 
-    String tumorType;
+    private String tumorType;
 
-    long datecreated;
+    private long datecreated;
 
     public Project() {
     }
